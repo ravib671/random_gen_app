@@ -31,3 +31,11 @@ app/build/outputs/apk/debug/app-debug.apk
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
+
+## Troubleshooting (Android Studio)
+If you still see type-mismatch errors around generated bindings after pulling changes:
+1. **Build > Clean Project**
+2. **Build > Rebuild Project**
+3. **File > Invalidate Caches... > Invalidate and Restart**
+
+This forces Android Studio to regenerate `ActivityMainBinding` / `ViewRandomSectionBinding` classes.

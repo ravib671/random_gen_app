@@ -2,8 +2,7 @@
     <string name="app_name">Random Number Cycles</string>
     <string name="selected_n_hint">Enter N (max value)</string>
     <string name="repeat_switch_label">Enable repeat</string>
-    <string name="generate">Generate</string>
-    <string name="result_placeholder">Result: -</string>
+    <string name="result_placeholder">Tap box to generate</string>
     <string name="cycle_status_placeholder">Cycle status: waiting</string>
     <string name="section_a_title">Part A (1..N)</string>
     <string name="section_b_title">Part B (1..N)</string>

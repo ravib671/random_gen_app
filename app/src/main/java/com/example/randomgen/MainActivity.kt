@@ -1,5 +1,8 @@
 package com.example.randomgen
 
+import android.animation.ObjectAnimator
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.randomgen.databinding.ActivityMainBinding
@@ -15,8 +18,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val controllerA = SectionController(binding.sectionA, getString(R.string.section_a_title))
-        val controllerB = SectionController(binding.sectionB, getString(R.string.section_b_title))
+        val sectionABinding = ViewRandomSectionBinding.bind(findViewById(R.id.sectionA))
+        val sectionBBinding = ViewRandomSectionBinding.bind(findViewById(R.id.sectionB))
+
+        val controllerA = SectionController(sectionABinding, getString(R.string.section_a_title))
+        val controllerB = SectionController(sectionBBinding, getString(R.string.section_b_title))
 
         controllerA.bind()
         controllerB.bind()
@@ -33,11 +39,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun bind() {
-            sectionBinding.btnGenerate.setOnClickListener {
+            sectionBinding.tvResult.setOnClickListener {
                 val maxValue = sectionBinding.etMaxValue.text.toString().toIntOrNull()
                 if (maxValue == null || maxValue < 1) {
-                    sectionBinding.tvResult.text = "Result: -"
+                    sectionBinding.tvResult.text = "-"
                     sectionBinding.tvCycleStatus.text = "Please enter N >= 1"
+                    animateResultBox()
                     return@setOnClickListener
                 }
 
@@ -48,9 +55,26 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val output = cycleGenerator?.nextValue() ?: return@setOnClickListener
-                sectionBinding.tvResult.text = "Result: ${output.value}"
+                sectionBinding.tvResult.text = output.value.toString()
                 sectionBinding.tvCycleStatus.text = output.status
+                sectionBinding.tvResult.backgroundTintList = ColorStateList.valueOf(randomBoxColor())
+                animateResultBox()
             }
+        }
+
+        private fun animateResultBox() {
+            sectionBinding.tvResult.rotation = 0f
+            ObjectAnimator.ofFloat(sectionBinding.tvResult, "rotation", 0f, 360f).apply {
+                duration = 420L
+                start()
+            }
+        }
+
+        private fun randomBoxColor(): Int {
+            val red = Random.nextInt(70, 256)
+            val green = Random.nextInt(70, 256)
+            val blue = Random.nextInt(70, 256)
+            return Color.rgb(red, green, blue)
         }
     }
 }

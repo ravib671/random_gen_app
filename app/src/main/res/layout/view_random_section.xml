@@ -40,20 +40,21 @@
             android:text="@string/repeat_switch_label"
             android:checked="true" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGenerate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/generate" />
-
         <TextView
             android:id="@+id/tvResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:background="@drawable/result_box_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:minHeight="86dp"
+            android:padding="12dp"
             android:text="@string/result_placeholder"
-            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineLarge"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvCycleStatus"
