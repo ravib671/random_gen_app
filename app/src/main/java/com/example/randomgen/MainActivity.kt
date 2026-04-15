@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.ColorUtils
 import com.example.randomgen.databinding.ActivityMainBinding
 import com.example.randomgen.databinding.ViewRandomSectionBinding
 import kotlin.random.Random
@@ -57,7 +58,9 @@ class MainActivity : AppCompatActivity() {
                 val output = cycleGenerator?.nextValue() ?: return@setOnClickListener
                 sectionBinding.tvResult.text = output.value.toString()
                 sectionBinding.tvCycleStatus.text = output.status
-                sectionBinding.tvResult.backgroundTintList = ColorStateList.valueOf(randomBoxColor())
+                val boxColor = randomBoxColor()
+                sectionBinding.tvResult.backgroundTintList = ColorStateList.valueOf(boxColor)
+                sectionBinding.tvResult.setTextColor(contrastTextColor(boxColor))
                 animateResultBox()
             }
         }
@@ -68,6 +71,12 @@ class MainActivity : AppCompatActivity() {
                 duration = 420L
                 start()
             }
+        }
+
+
+        private fun contrastTextColor(backgroundColor: Int): Int {
+            val luminance = ColorUtils.calculateLuminance(backgroundColor)
+            return if (luminance < 0.45) Color.WHITE else Color.BLACK
         }
 
         private fun randomBoxColor(): Int {
