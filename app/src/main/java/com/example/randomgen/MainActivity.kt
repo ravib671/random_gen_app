@@ -1,8 +1,10 @@
 package com.example.randomgen
 
+import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import androidx.core.animation.doOnEnd
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -14,6 +16,8 @@ import kotlin.random.Random
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var sectionAController: SectionController
+    private lateinit var sectionBController: SectionController
     private val preferences by lazy { getPreferences(MODE_PRIVATE) }
     private var partCount = 2
 
@@ -25,8 +29,10 @@ class MainActivity : AppCompatActivity() {
         val sectionA = binding.sectionA
         val sectionB = binding.sectionB
 
-        SectionController(sectionA, getString(R.string.section_a_title)).bind()
-        SectionController(sectionB, getString(R.string.section_b_title)).bind()
+        sectionAController = SectionController(sectionA, getString(R.string.section_a_title))
+        sectionBController = SectionController(sectionB, getString(R.string.section_b_title))
+        sectionAController.bind()
+        sectionBController.bind()
 
         restoreControls(sectionA, savedInstanceState?.getBundle("partA"))
         restoreControls(sectionB, savedInstanceState?.getBundle("partB"))
@@ -50,11 +56,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updatePartLayout() {
+        sectionAController.finishFlip()
+        sectionBController.finishFlip()
         val showTwoParts = partCount == 2
         binding.sectionB.root.isVisible = showTwoParts
         binding.sectionA.tvSectionTitle.isVisible = showTwoParts
         val height = if (showTwoParts) R.dimen.result_height else R.dimen.single_result_height
         binding.sectionA.tvResult.minimumHeight = resources.getDimensionPixelSize(height)
+    }
+
+    override fun onDestroy() {
+        sectionAController.cancelFlip()
+        sectionBController.cancelFlip()
+        super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -80,13 +94,18 @@ class MainActivity : AppCompatActivity() {
         title: String
     ) {
         private var cycleGenerator: RandomCycleGenerator? = null
+        private var flipAnimator: ValueAnimator? = null
 
         init {
             sectionBinding.tvSectionTitle.text = title
         }
 
         fun bind() {
-            sectionBinding.tvResult.setOnClickListener {
+            val button = sectionBinding.tvResult
+            button.cameraDistance = 8_000f * resources.displayMetrics.density
+            button.setOnClickListener {
+                if (flipAnimator != null) return@setOnClickListener
+
                 val maxValue = sectionBinding.etMaxValue.text.toString().toIntOrNull()
                 if (maxValue == null || maxValue < 1) {
                     sectionBinding.tvCycleStatus.text = getString(R.string.invalid_maximum, Int.MAX_VALUE)
@@ -100,21 +119,44 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val output = cycleGenerator?.nextValue() ?: return@setOnClickListener
-                sectionBinding.tvResult.text = output.value.toString()
-                sectionBinding.tvCycleStatus.text = output.status
-                val boxColor = randomBoxColor()
-                sectionBinding.tvResult.backgroundTintList = ColorStateList.valueOf(boxColor)
-                sectionBinding.tvResult.setTextColor(contrastTextColor(boxColor))
-                animateResultBox()
+                animateResultBox(output, randomBoxColor())
             }
         }
 
-        private fun animateResultBox() {
+        fun finishFlip() {
+            flipAnimator?.end()
+        }
+
+        fun cancelFlip() {
+            flipAnimator?.cancel()
+        }
+
+        private fun animateResultBox(output: RandomOutput, boxColor: Int) {
             val button = sectionBinding.tvResult
-            button.animate().cancel()
-            button.scaleX = 0.94f
-            button.scaleY = 0.94f
-            button.animate().scaleX(1f).scaleY(1f).setDuration(220L).start()
+            var revealed = false
+            val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 550L
+                addUpdateListener { animation ->
+                    val progress = animation.animatedValue as Float
+                    // Swap faces while the button is edge-on so the new number is never mirrored.
+                    button.rotationX = 180f * (if (progress < 0.5f) progress else progress - 1f)
+                    if (progress >= 0.5f && !revealed) {
+                        revealed = true
+                        button.text = output.value.toString()
+                        sectionBinding.tvCycleStatus.text = output.status
+                        button.backgroundTintList = ColorStateList.valueOf(boxColor)
+                        button.setTextColor(contrastTextColor(boxColor))
+                    }
+                }
+                doOnEnd {
+                    button.rotationX = 0f
+                    button.isClickable = true
+                    flipAnimator = null
+                }
+            }
+            flipAnimator = animator
+            button.isClickable = false
+            animator.start()
         }
 
         private fun contrastTextColor(backgroundColor: Int): Int {
