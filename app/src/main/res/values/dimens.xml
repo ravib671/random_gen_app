@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="result_height">86dp</dimen>
+    <dimen name="single_result_height">160dp</dimen>
+</resources>

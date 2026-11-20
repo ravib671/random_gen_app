@@ -1,9 +1,14 @@
 <resources>
     <string name="app_name">Random Number Cycles</string>
-    <string name="selected_n_hint">Enter N (max value)</string>
+    <string name="selected_n_hint">Maximum number</string>
     <string name="repeat_switch_label">Enable repeat</string>
-    <string name="result_placeholder">Tap box to generate</string>
+    <string name="result_placeholder">Generate</string>
     <string name="cycle_status_placeholder">Cycle status: waiting</string>
-    <string name="section_a_title">Part A (1..N)</string>
-    <string name="section_b_title">Part B (1..N)</string>
+    <string name="section_a_title">Part A</string>
+    <string name="section_b_title">Part B</string>
+    <string name="settings">Settings</string>
+    <string name="number_of_parts">Number of parts</string>
+    <string name="one_part">1 part</string>
+    <string name="two_parts">2 parts</string>
+    <string name="invalid_maximum">Enter a maximum between 1 and %1$d.</string>
 </resources>
